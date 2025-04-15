@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Surfer Shark Dodging Game</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #e0f7fa;
+      text-align: center;
+      padding: 40px 20px;
+      margin: 0;
+    }
+
+    h1 {
+      color: #0077b6;
+      margin-top: 60px;
+    }
+
+    .nav-links {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 18px;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: #0077b6;
+      margin-right: 15px;
+    }
+
+    .nav-links a:hover {
+      color: #023e8a;
+    }
+
+    #wave-container {
+      display: flex;
+      justify-content: center;
+      position: relative;
+      margin-top: 20px;
+    }
+
+    .wave {
+      width: 90vw;
+      max-width: 500px;
+      height: 220px;
+      background: linear-gradient(to top, #0288d1, #4fc3f7);
+      position: relative;
+      border-radius: 50% 50% 0 0;
+      overflow: hidden;
+    }
+
+    .surfer {
+      font-size: 50px;
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      text-shadow: 2px 2px 5px white;
+      width: 40px;
+      height: 40px;
+    }
+
+    .shark {
+      font-size: 40px;
+      position: absolute;
+      top: 40%;
+      left: 100%;
+      z-index: 3;
+      animation: swim 5s linear infinite;
+      width: 40px;
+      height: 40px;
+    }
+
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #0077b6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: 20px;
+    }
+
+    button:hover {
+      background-color: #023e8a;
+    }
+
+    .game-over {
+      font-size: 28px;
+      color: red;
+      margin-top: 20px;
+    }
+
+    @keyframes swim {
+      0% { left: 100%; }
+      100% { left: -50px; }
+    }
+
+    /* Mobile touch controls */
+    .controls {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .touch-button {
+      padding: 20px;
+      font-size: 20px;
+      border-radius: 12px;
+      background-color: #0077b6;
+      color: white;
+      border: none;
+      width: 60px;
+      height: 60px;
+      flex-shrink: 0;
+    }
+
+    .touch-button:active {
+      background-color: #005f99;
+    }
+
+    @media (hover: none) and (pointer: coarse) {
+      .controls {
+        display: flex;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="nav-links">
+    <a href="index.html">Home Page</a>
+    <a href="scratch.html">Waves of the World</a>
+  </div>
+
+  <h1>🏄 Surf or Die</h1>
+  <button onclick="startGame()">Start Game</button>
+  <p>Use arrows or tap the buttons below to dodge the sharks!</p>
+
+  <div id="wave-container"></div>
+  <p class="game-over" style="display: none;">Game Over! You were eaten by a shark!</p>
+
+  <!-- Touch Controls -->
+  <div class="controls">
+    <button class="touch-button" onclick="handleTouch('ArrowLeft')">⬅️</button>
+    <button class="touch-button" onclick="handleTouch('ArrowUp')">⬆️</button>
+    <button class="touch-button" onclick="handleTouch('ArrowDown')">⬇️</button>
+    <button class="touch-button" onclick="handleTouch('ArrowRight')">➡️</button>
+  </div>
+
+  <script>
+    let activeSurfer = null;
+    let sharkInterval = null;
+    let isGameOver = false;
+
+    function startGame() {
+      isGameOver = false;
+      document.querySelector('.game-over').style.display = 'none';
+      document.getElementById('wave-container').innerHTML = '';
+
+      createWave();
+      activeSurfer = document.querySelector('.surfer');
+
+      document.addEventListener('keydown', moveSurfer);
+      sharkInterval = setInterval(createShark, 3000);
+    }
+
+    function createWave() {
+      const wave = document.createElement('div');
+      wave.classList.add('wave');
+
+      const surfer = document.createElement('div');
+      surfer.classList.add('surfer');
+      surfer.textContent = '🏄‍♂️';
+
+      wave.appendChild(surfer);
+      document.getElementById('wave-container').appendChild(wave);
+    }
+
+    function moveSurfer(e) {
+      if (isGameOver) return;
+      move(e.key);
+    }
+
+    function handleTouch(direction) {
+      if (!isGameOver) move(direction);
+    }
+
+    function move(direction) {
+      const surfer = activeSurfer;
+      const wave = document.querySelector('.wave');
+      const waveHeight = wave.offsetHeight;
+      const waveWidth = wave.offsetWidth;
+
+      let currentLeft = parseFloat(surfer.style.left || '50');
+      let currentTop = parseFloat(surfer.style.top || '10');
+
+      if (direction === 'ArrowLeft') {
+        surfer.style.left = Math.max(5, currentLeft - 5) + '%';
+      }
+      if (direction === 'ArrowRight') {
+        surfer.style.left = Math.min(95, currentLeft + 5) + '%';
+      }
+      if (direction === 'ArrowUp') {
+        surfer.style.top = Math.max(0, currentTop - 10) + 'px';
+      }
+      if (direction === 'ArrowDown') {
+        surfer.style.top = Math.min(waveHeight - 50, currentTop + 10) + 'px';
+      }
+    }
+
+    function createShark() {
+      if (isGameOver) return;
+
+      const shark = document.createElement('div');
+      shark.classList.add('shark');
+      shark.textContent = '🦈';
+
+      const wave = document.querySelector('.wave');
+      const randomYPosition = Math.random() * 70 + 15;
+      shark.style.top = `${randomYPosition}%`;
+
+      wave.appendChild(shark);
+
+      setInterval(() => {
+        if (isGameOver) return;
+        checkCollision(shark);
+      }, 50);
+    }
+
+    function checkCollision(shark) {
+      const surfer = activeSurfer;
+      if (!surfer || !shark) return;
+
+      const surferRect = surfer.getBoundingClientRect();
+      const sharkRect = shark.getBoundingClientRect();
+
+      if (
+        surferRect.left < sharkRect.right &&
+        surferRect.right > sharkRect.left &&
+        surferRect.top < sharkRect.bottom &&
+        surferRect.bottom > sharkRect.top
+      ) {
+        endGame();
+      }
+    }
+
+    function endGame() {
+      clearInterval(sharkInterval);
+      document.querySelector('.game-over').style.display = 'block';
+      isGameOver = true;
+      document.removeEventListener('keydown', moveSurfer);
+    }
+  </script>
+</body>
+</html>
